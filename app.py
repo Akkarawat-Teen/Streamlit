@@ -6,28 +6,22 @@ import pandas as pd
 # ตั้งค่าหน้าเว็บ
 # -----------------------------
 st.set_page_config(page_title="Streamlit Assignment", layout="wide")
-st.title("งาน Streamlit")
+st.title("งาน Streamlit ของ Attapon")
 
 # -----------------------------
-# 1️⃣ ข้อมูลจาก MOPH OpenData (DDC API)
+# 1️⃣ ข้อมูลจาก MOPH OpenData (ตัวอย่าง JSON)
 # -----------------------------
 st.header("1. ข้อมูลจากกระทรวงสาธารณสุข (OpenData)")
 
-# ใช้ API ของ DDC (COVID-19 รายวัน) แทน MOPH datastore
-moph_api_url = "https://covid19.ddc.moph.go.th/api/Cases/today-cases-all"
+# ใช้ JSON ตัวอย่างจาก MOPH GitHub ที่สามารถเข้าถึงได้
+moph_json_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/03-01-2023.csv"
 
 try:
-    response = requests.get(moph_api_url)
-    response.raise_for_status()
-    data = response.json()
-    
-    # แปลงเป็น DataFrame
-    df_moph = pd.DataFrame([data])
-    
-    st.write("ข้อมูลผู้ป่วย COVID-19 ล่าสุดจาก DDC:")
-    st.dataframe(df_moph)
+    df_moph = pd.read_csv(moph_json_url)
+    st.write("ตัวอย่างข้อมูล COVID-19 ล่าสุดจากไฟล์ CSV ที่เข้าถึงได้:")
+    st.dataframe(df_moph.head(10))
 except Exception as e:
-    st.error(f"เกิดข้อผิดพลาดในการเรียก API: {e}")
+    st.error(f"เกิดข้อผิดพลาดในการโหลดข้อมูล: {e}")
 
 # -----------------------------
 # 2️⃣ แสดงอัตราแลกเปลี่ยนเงินตรา (API Key required)
