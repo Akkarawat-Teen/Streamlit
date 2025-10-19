@@ -23,30 +23,33 @@ except Exception as e:
     st.error(f"เกิดข้อผิดพลาดในการโหลดข้อมูล: {e}")
 
 # -----------------------------
-# 2️⃣ แสดงอัตราแลกเปลี่ยนเงินตรา (ฟรี ไม่ต้อง API Key)
+# 2️⃣ แสดงอัตราแลกเปลี่ยนเงินตรา (ต้องใช้ API Key)
 # -----------------------------
-st.header("2. อัตราแลกเปลี่ยนเงินตรา (ฟรี ไม่ต้อง API Key)")
+st.header("2. อัตราแลกเปลี่ยนเงินตรา (ต้องใช้ API Key)")
 
-# ใช้ API ฟรีจาก exchangerate.host
-exchange_api_url = "https://api.exchangerate.host/latest?base=USD"
+api_key = st.text_input("กรุณาใส่ API Key ของ ExchangeRate-API:", type="password")
 
-try:
-    response = requests.get(exchange_api_url)
-    response.raise_for_status()
-    data = response.json()
+if api_key:
+    exchange_api_url = f"https://v6.exchangerate-api.com/v6/{api_key}/latest/USD"
 
-    # ตรวจสอบว่า key 'rates' มีอยู่
-    rates = data.get("rates")
-    if rates:
-        df_rates = pd.DataFrame(list(rates.items()), columns=["Currency", "Rate"])
-        st.write("อัตราแลกเปลี่ยน USD กับสกุลเงินอื่น (ฟรี ไม่ต้อง API Key):")
-        st.dataframe(df_rates)
-        
-        # Dropdown เลือกสกุลเงิน
-        selected_currency = st.selectbox("เลือกสกุลเงินที่ต้องการ:", df_rates["Currency"])
-        st.write(f"1 USD = {rates[selected_currency]:,.2f} {selected_currency}")
-    else:
-        st.error("ไม่พบข้อมูลอัตราแลกเปลี่ยนจาก API")
+    try:
+        response = requests.get(exchange_api_url)
+        response.raise_for_status()
+        data = response.json()
 
-except Exception as e:
-    st.error(f"เกิดข้อผิดพลาดในการเรียก API: {e}")
+        if data["result"] == "success":
+            rates = data["conversion_rates"]
+            df_rates = pd.DataFrame(list(rates.items()), columns=["Currency", "Rate"])
+            
+            st.write("อัตราแลกเปลี่ยน USD กับสกุลเงินอื่น:")
+            st.dataframe(df_rates)
+            
+            # Dropdown เลือกสกุลเงิน
+            selected_currency = st.selectbox("เลือกสกุลเงินที่ต้องการ:", df_rates["Currency"])
+            st.write(f"1 USD = {rates[selected_currency]:,.2f} {selected_currency}")
+        else:
+            st.warning("ไม่สามารถเรียกอัตราแลกเปลี่ยนได้")
+    except Exception as e:
+        st.error(f"เกิดข้อผิดพลาดในการเรียก API: {e}")
+else:
+    st.info("กรุณาใส่ API Key เพื่อดูอัตราแลกเปลี่ยน")
