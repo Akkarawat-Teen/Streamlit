@@ -23,11 +23,10 @@ except Exception as e:
     st.error(f"เกิดข้อผิดพลาดในการโหลดข้อมูล: {e}")
 
 # -----------------------------
-# 2️⃣ แสดงอัตราแลกเปลี่ยนเงินตรา (ไม่ต้องใช้ API Key)
+# 2️⃣ แสดงอัตราแลกเปลี่ยนเงินตรา (ฟรี ไม่ต้อง API Key)
 # -----------------------------
 st.header("2. อัตราแลกเปลี่ยนเงินตรา (ฟรี ไม่ต้อง API Key)")
 
-# ใช้ API ฟรีจาก exchangerate.host
 exchange_api_url = "https://api.exchangerate.host/latest?base=USD"
 
 try:
@@ -35,15 +34,21 @@ try:
     response.raise_for_status()
     data = response.json()
 
-    rates = data["rates"]
-    df_rates = pd.DataFrame(list(rates.items()), columns=["Currency", "Rate"])
-    
-    st.write("อัตราแลกเปลี่ยน USD กับสกุลเงินอื่น (ฟรี ไม่ต้อง API Key):")
-    st.dataframe(df_rates)
-    
-    # Dropdown เลือกสกุลเงิน
-    selected_currency = st.selectbox("เลือกสกุลเงินที่ต้องการ:", df_rates["Currency"])
-    st.write(f"1 USD = {rates[selected_currency]:,.2f} {selected_currency}")
+    # ตรวจสอบว่า API สำเร็จ
+    if data.get("success", False):
+        rates = data.get("rates", {})
+        if rates:
+            df_rates = pd.DataFrame(list(rates.items()), columns=["Currency", "Rate"])
+            st.write("อัตราแลกเปลี่ยน USD กับสกุลเงินอื่น (ฟรี ไม่ต้อง API Key):")
+            st.dataframe(df_rates)
+            
+            # Dropdown เลือกสกุลเงิน
+            selected_currency = st.selectbox("เลือกสกุลเงินที่ต้องการ:", df_rates["Currency"])
+            st.write(f"1 USD = {rates[selected_currency]:,.2f} {selected_currency}")
+        else:
+            st.warning("ไม่พบข้อมูลอัตราแลกเปลี่ยน")
+    else:
+        st.error("API ไม่สามารถให้ข้อมูลได้")
 
 except Exception as e:
     st.error(f"เกิดข้อผิดพลาดในการเรียก API: {e}")
