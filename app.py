@@ -6,7 +6,7 @@ import pandas as pd
 # ตั้งค่าหน้าเว็บ
 # -----------------------------
 st.set_page_config(page_title="Streamlit Assignment", layout="wide")
-st.title("งาน Streamlit ของ Attapon")
+st.title("งาน Streamlit")
 
 # -----------------------------
 # 1️⃣ ข้อมูลจาก MOPH OpenData (ตัวอย่าง CSV)
@@ -27,6 +27,7 @@ except Exception as e:
 # -----------------------------
 st.header("2. อัตราแลกเปลี่ยนเงินตรา (ฟรี ไม่ต้อง API Key)")
 
+# ใช้ API ฟรีจาก exchangerate.host
 exchange_api_url = "https://api.exchangerate.host/latest?base=USD"
 
 try:
@@ -34,21 +35,18 @@ try:
     response.raise_for_status()
     data = response.json()
 
-    # ตรวจสอบว่า API สำเร็จ
-    if data.get("success", False):
-        rates = data.get("rates", {})
-        if rates:
-            df_rates = pd.DataFrame(list(rates.items()), columns=["Currency", "Rate"])
-            st.write("อัตราแลกเปลี่ยน USD กับสกุลเงินอื่น (ฟรี ไม่ต้อง API Key):")
-            st.dataframe(df_rates)
-            
-            # Dropdown เลือกสกุลเงิน
-            selected_currency = st.selectbox("เลือกสกุลเงินที่ต้องการ:", df_rates["Currency"])
-            st.write(f"1 USD = {rates[selected_currency]:,.2f} {selected_currency}")
-        else:
-            st.warning("ไม่พบข้อมูลอัตราแลกเปลี่ยน")
+    # ตรวจสอบว่า key 'rates' มีอยู่
+    rates = data.get("rates")
+    if rates:
+        df_rates = pd.DataFrame(list(rates.items()), columns=["Currency", "Rate"])
+        st.write("อัตราแลกเปลี่ยน USD กับสกุลเงินอื่น (ฟรี ไม่ต้อง API Key):")
+        st.dataframe(df_rates)
+        
+        # Dropdown เลือกสกุลเงิน
+        selected_currency = st.selectbox("เลือกสกุลเงินที่ต้องการ:", df_rates["Currency"])
+        st.write(f"1 USD = {rates[selected_currency]:,.2f} {selected_currency}")
     else:
-        st.error("API ไม่สามารถให้ข้อมูลได้")
+        st.error("ไม่พบข้อมูลอัตราแลกเปลี่ยนจาก API")
 
 except Exception as e:
     st.error(f"เกิดข้อผิดพลาดในการเรียก API: {e}")
