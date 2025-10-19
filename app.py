@@ -6,14 +6,13 @@ import pandas as pd
 # ตั้งค่าหน้าเว็บ
 # -----------------------------
 st.set_page_config(page_title="Streamlit Assignment", layout="wide")
-st.title("งาน Streamlit")
+st.title("งาน Streamlit ของ Attapon")
 
 # -----------------------------
 # 1️⃣ ข้อมูลจาก MOPH OpenData (ตัวอย่าง CSV)
 # -----------------------------
 st.header("1. ข้อมูลจากกระทรวงสาธารณสุข (OpenData)")
 
-# ตัวอย่าง CSV จาก GitHub ของ CSSE COVID-19
 moph_csv_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/03-01-2023.csv"
 
 try:
@@ -24,31 +23,27 @@ except Exception as e:
     st.error(f"เกิดข้อผิดพลาดในการโหลดข้อมูล: {e}")
 
 # -----------------------------
-# 2️⃣ แสดงอัตราแลกเปลี่ยนเงินตรา (API Key ฟรีทดลอง)
+# 2️⃣ แสดงอัตราแลกเปลี่ยนเงินตรา (ไม่ต้องใช้ API Key)
 # -----------------------------
-st.header("2. อัตราแลกเปลี่ยนเงินตรา")
+st.header("2. อัตราแลกเปลี่ยนเงินตรา (ฟรี ไม่ต้อง API Key)")
 
-# ใช้ API Key ตัวอย่างสำหรับทดลอง (Demo key)
-demo_api_key = "0f1c2d3e4b5a6f7g"  # ใช้ได้สำหรับทดลองเท่านั้น
-
-exchange_api_url = f"https://v6.exchangerate-api.com/v6/{demo_api_key}/latest/USD"
+# ใช้ API ฟรีจาก exchangerate.host
+exchange_api_url = "https://api.exchangerate.host/latest?base=USD"
 
 try:
     response = requests.get(exchange_api_url)
     response.raise_for_status()
     data = response.json()
 
-    if data["result"] == "success":
-        rates = data["conversion_rates"]
-        df_rates = pd.DataFrame(list(rates.items()), columns=["Currency", "Rate"])
-        
-        st.write("อัตราแลกเปลี่ยน USD กับสกุลเงินอื่น (ทดลอง):")
-        st.dataframe(df_rates)
-        
-        # Dropdown เลือกสกุลเงิน
-        selected_currency = st.selectbox("เลือกสกุลเงินที่ต้องการ:", df_rates["Currency"])
-        st.write(f"1 USD = {rates[selected_currency]} {selected_currency}")
-    else:
-        st.warning("ไม่สามารถเรียกอัตราแลกเปลี่ยนได้")
+    rates = data["rates"]
+    df_rates = pd.DataFrame(list(rates.items()), columns=["Currency", "Rate"])
+    
+    st.write("อัตราแลกเปลี่ยน USD กับสกุลเงินอื่น (ฟรี ไม่ต้อง API Key):")
+    st.dataframe(df_rates)
+    
+    # Dropdown เลือกสกุลเงิน
+    selected_currency = st.selectbox("เลือกสกุลเงินที่ต้องการ:", df_rates["Currency"])
+    st.write(f"1 USD = {rates[selected_currency]:,.2f} {selected_currency}")
+
 except Exception as e:
     st.error(f"เกิดข้อผิดพลาดในการเรียก API: {e}")
