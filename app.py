@@ -6,29 +6,26 @@ import pandas as pd
 # ตั้งค่าหน้าเว็บ
 # -----------------------------
 st.set_page_config(page_title="Streamlit Assignment", layout="wide")
-st.title("งาน Streamlit ของ Attapon")
+st.title("งาน Streamlit")
 
 # -----------------------------
-# 1️⃣ ข้อมูลจาก MOPH OpenData
+# 1️⃣ ข้อมูลจาก MOPH OpenData (DDC API)
 # -----------------------------
 st.header("1. ข้อมูลจากกระทรวงสาธารณสุข (OpenData)")
 
-# ตัวอย่าง resource_id ของ MOPH (เปลี่ยนเป็น dataset ที่คุณต้องการ)
-RESOURCE_ID = "9c76c1a2-f4c0-44a6-9d90-0a87935e484e"  # ตัวอย่าง: ข้อมูลผู้ป่วย COVID-19 รายวัน
-
-moph_api_url = f"https://data.moph.go.th/api/datastore_search?resource_id={RESOURCE_ID}&limit=10"
+# ใช้ API ของ DDC (COVID-19 รายวัน) แทน MOPH datastore
+moph_api_url = "https://covid19.ddc.moph.go.th/api/Cases/today-cases-all"
 
 try:
     response = requests.get(moph_api_url)
     response.raise_for_status()
     data = response.json()
     
-    if "result" in data and "records" in data["result"]:
-        df_moph = pd.DataFrame(data["result"]["records"])
-        st.write("ตัวอย่างข้อมูล 10 รายการล่าสุด:")
-        st.dataframe(df_moph)
-    else:
-        st.warning("ไม่พบข้อมูลใน API")
+    # แปลงเป็น DataFrame
+    df_moph = pd.DataFrame([data])
+    
+    st.write("ข้อมูลผู้ป่วย COVID-19 ล่าสุดจาก DDC:")
+    st.dataframe(df_moph)
 except Exception as e:
     st.error(f"เกิดข้อผิดพลาดในการเรียก API: {e}")
 
